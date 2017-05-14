@@ -51,10 +51,11 @@
             android:text="@string/str_receive"
             android:layout_marginRight="@dimen/dp_8"/>
         <Button
-            android:id="@+id/btn_open"
+            android:id="@+id/btn_test"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="open"/>
+            style="@style/style_home_text_view"
+            android:text="我要测试"/>
 
     </LinearLayout>
     <TextView

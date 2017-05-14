@@ -66,6 +66,8 @@ public class HomeActivity extends BaseActivity
     Button btn_send;
     @Bind(R.id.btn_receive)
     Button btn_receive;
+    @Bind(R.id.btn_test)
+    Button btn_test;
 
     /**
      * 其他UI
@@ -302,7 +304,9 @@ public class HomeActivity extends BaseActivity
                 NavigatorUtils.toSystemFileChooser(getContext());
                 break;
             }
-
+            case R.id.btn_test:
+                ToastUtils.show(this,"just a test");
+                break;
         }
     }
 
