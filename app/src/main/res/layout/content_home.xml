@@ -26,10 +26,9 @@
         android:text="@string/str_receive"
         android:layout_marginTop="@dimen/dp_32"/>
         <Button
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:id="@+id/btn_open"
-            android:text="open"
+            style="@style/style_home_big_text_view"
+            android:id="@+id/btn_test"
+            android:text="我要测试"
             android:layout_marginTop="@dimen/dp_32"/>
     </LinearLayout>
     <LinearLayout
@@ -38,7 +37,6 @@
         android:layout_below="@id/ll_main"
         android:background="@color/white"
         android:orientation="horizontal"
-        android:gravity="end"
         android:padding="@dimen/activity_horizontal_margin">
         <RelativeLayout
             android:id="@+id/rl_device"

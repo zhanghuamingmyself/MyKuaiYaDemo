@@ -32,7 +32,7 @@ public class Constant {
     /**
      * 最大尝试数
      */
-    public static final int DEFAULT_TRY_TIME = 10;
+    public static final int DEFAULT_TRY_TIME = 5;
 
     /**
      * 文件传输监听 默认端口
@@ -101,7 +101,7 @@ public class Constant {
     };
 
 
-    public static final String GITHUB_PROJECT_SITE = "https://github.com/zhanghuaming/KuaiChuan/";
+    public static final String GITHUB_PROJECT_SITE = "https://github.com/zhanghuamingmyself/MyKuaiYaDemo";
 
 
     /**

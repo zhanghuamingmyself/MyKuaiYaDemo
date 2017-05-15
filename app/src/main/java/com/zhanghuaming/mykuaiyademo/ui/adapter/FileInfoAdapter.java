@@ -152,6 +152,33 @@ public class FileInfoAdapter extends CommonAdapter<FileInfo> {
                 }
             }
         }
+        else if(mType == FileInfo.TYPE_OTHER){ //MP4 convertView
+            OtherViewHolder viewHolder = null;
+            if(convertView == null){
+                convertView = View.inflate(getContext(), R.layout.item_mp4, null);
+                viewHolder = new OtherViewHolder();
+                viewHolder.iv_shortcut = (ImageView) convertView.findViewById(R.id.iv_shortcut);
+                viewHolder.iv_ok_tick = (ImageView) convertView.findViewById(R.id.iv_ok_tick);
+                viewHolder.tv_name = (TextView) convertView.findViewById(R.id.tv_name);
+                viewHolder.tv_size = (TextView) convertView.findViewById(R.id.tv_size);
+                convertView.setTag(viewHolder);
+            }else{
+                viewHolder = (OtherViewHolder) convertView.getTag();
+            }
+
+            if(getDataList() != null && getDataList().get(position) != null){
+                viewHolder.iv_shortcut.setImageBitmap(fileInfo.getBitmap());
+                viewHolder.tv_name.setText(fileInfo.getName() == null ? "" : fileInfo.getName());
+                viewHolder.tv_size.setText(fileInfo.getSizeDesc() == null ? "" : fileInfo.getSizeDesc());
+
+                //全局变量是否存在FileInfo
+                if(AppContext.getAppContext().isExist(fileInfo)){
+                    viewHolder.iv_ok_tick.setVisibility(View.VISIBLE);
+                }else{
+                    viewHolder.iv_ok_tick.setVisibility(View.GONE);
+                }
+            }
+        }
 
         return convertView;
     }
@@ -175,6 +202,13 @@ public class FileInfoAdapter extends CommonAdapter<FileInfo> {
     }
 
     static class Mp4ViewHolder {
+        ImageView iv_shortcut;
+        ImageView iv_ok_tick;
+        TextView tv_name;
+        TextView tv_size;
+    }
+
+    static class OtherViewHolder {
         ImageView iv_shortcut;
         ImageView iv_ok_tick;
         TextView tv_name;

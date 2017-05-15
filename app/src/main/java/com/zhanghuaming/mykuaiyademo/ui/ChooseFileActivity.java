@@ -80,6 +80,8 @@ public class ChooseFileActivity extends BaseActivity {
     FileInfoFragment mMp3InfoFragment;
     FileInfoFragment mMp4InfoFragment;
 
+    FileInfoFragment otherFileFragment;
+
     /**
      * 选中文件列表的对话框
      */
@@ -161,6 +163,7 @@ public class ChooseFileActivity extends BaseActivity {
         mJpgInfoFragment = FileInfoFragment.newInstance(FileInfo.TYPE_JPG);
         mMp3InfoFragment = FileInfoFragment.newInstance(FileInfo.TYPE_MP3);
         mMp4InfoFragment = FileInfoFragment.newInstance(FileInfo.TYPE_MP4);
+        otherFileFragment= FileInfoFragment.newInstance(FileInfo.TYPE_OTHER);
         mCurrentFragment = mApkInfoFragment;
 
         String[] titles = getResources().getStringArray(R.array.array_res);
@@ -185,6 +188,8 @@ public class ChooseFileActivity extends BaseActivity {
 
                 } else if (position == 3) { //视频
 
+                }else if(position == 4){//其他
+
                 }
             }
 
@@ -193,7 +198,7 @@ public class ChooseFileActivity extends BaseActivity {
 
             }
         });
-        view_pager.setOffscreenPageLimit(4);
+        view_pager.setOffscreenPageLimit(5);
 
         tab_layout.setTabMode(TabLayout.MODE_FIXED);
         tab_layout.setupWithViewPager(view_pager);
@@ -223,6 +228,7 @@ public class ChooseFileActivity extends BaseActivity {
         if(mJpgInfoFragment != null) mJpgInfoFragment.updateFileInfoAdapter();
         if(mMp3InfoFragment != null) mMp3InfoFragment.updateFileInfoAdapter();
         if(mMp4InfoFragment != null) mMp4InfoFragment.updateFileInfoAdapter();
+        if(otherFileFragment !=null) otherFileFragment.updateFileInfoAdapter();
 
         //更新已选中Button
         getSelectedView();
@@ -328,6 +334,9 @@ public class ChooseFileActivity extends BaseActivity {
                 mCurrentFragment = mMp3InfoFragment;
             }else if(position == 3){ //视频
                 mCurrentFragment = mMp4InfoFragment;
+            }else if(position ==4)
+            {
+                mCurrentFragment = otherFileFragment;
             }
             return mCurrentFragment;
         }

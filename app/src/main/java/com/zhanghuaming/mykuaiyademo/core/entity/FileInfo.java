@@ -28,6 +28,7 @@ public class FileInfo implements Serializable {
     public static final String EXTEND_MP3 = ".mp3";
     public static final String EXTEND_MP4 = ".mp4";
 
+
     /**
      * 自定义文件类型
      */
@@ -35,6 +36,8 @@ public class FileInfo implements Serializable {
     public static final int TYPE_JPG = 2;
     public static final int TYPE_MP3 = 3;
     public static final int TYPE_MP4 = 4;
+
+    public static final int TYPE_OTHER = 5;
 
 
     /**
@@ -230,23 +233,5 @@ public class FileInfo implements Serializable {
                 '}';
     }
 
-    public static void main(String[] args){
-        System.out.println("Hello world");
 
-        List<FileInfo> fileInfos = new ArrayList<FileInfo>();
-        FileInfo fileInfo = new FileInfo();
-        for(int i=0; i < 3; i++){
-            fileInfo = new FileInfo();
-            fileInfo.setFilePath("/sdcard/test" + i + ".apk");
-            fileInfo.setFileType(TYPE_APK);
-            fileInfo.setSize(1000 + i);
-
-            fileInfos.add(fileInfo);
-
-            fileInfo = null;
-        }
-
-        System.out.println("List<FileInfo> to JsonStr: \n" + toJsonArrayStr(fileInfos));
-
-    }
 }

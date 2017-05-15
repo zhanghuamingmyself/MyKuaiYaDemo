@@ -2,8 +2,8 @@
     <string name="app_name">快传</string>
     <string name="action_settings">Settings</string>
 
-    <string name="str_send">我要发送</string>
-    <string name="str_receive">我要接收</string>
+    <string name="str_send">发送</string>
+    <string name="str_receive">接收</string>
     <string name="str_start">开启</string>
     <string name="str_stop">关闭</string>
     <string name="action_disable_ap">关闭热点</string>
@@ -22,8 +22,8 @@
     <string name="str_mp3_desc">音乐</string>
     <string name="str_mp4_desc">视频</string>
     <string name="str_desc">描述</string>
-    <string name="action_client">我要发送</string>
-    <string name="action_server">我要接收</string>
+    <string name="action_client">发送</string>
+    <string name="action_server">接收</string>
     <string name="action_apk">apk</string>
     <string name="action_jpg">jpg</string>
     <string name="action_mp3">MP3</string>
@@ -68,8 +68,8 @@
     <string name="str_computer_transfer">电脑传</string>
     <string name="str_web_transfer">网页传</string>
 
-    <!--<string name="str_my_floating_action_button_behavior">io.github.zhanghuaming.kuaichuan.ui.view.MyFloatingButtonBehavior</string>-->
-    <string name="str_my_floating_action_button_behavior">io.github.zhanghuaming.kuaichuan.ui.view.FooterBehaviorDependAppBar</string>
+    <!--<string name="str_my_floating_action_button_behavior">com.zhanghuaming.mykuaiyademo.ui.view.MyFloatingButtonBehavior</string>-->
+    <string name="str_my_floating_action_button_behavior">com.zhanghuaming.mykuaiyademo.ui.view.FooterBehaviorDependAppBar</string>
 
 
     <string-array name="array_res">
@@ -77,6 +77,7 @@
         <item>图片</item>
         <item>音乐</item>
         <item>视频</item>
+        <item>其他</item>
     </string-array>
     <string name="title_activity_home">HomeActivity</string>
 
@@ -100,7 +101,7 @@
     <string name="str_about_me_desc">作者：zhanghuaming</string>
     <string name="str_about_me_qq">QQ：2964539698</string>
     <string name="str_about_me_email">Emial:zhanghuamingmyself@163.com</string>
-    <string name="str_about_me_github">Github: ------------------/</string>
+    <string name="str_about_me_github">https://github.com/zhanghuamingmyself/</string>
     <string name="str_weiguan">围观</string>
     <string name="tip_web_transfer_first_tip">
         第1步 \n

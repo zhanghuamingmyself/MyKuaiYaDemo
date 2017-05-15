@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -79,6 +80,9 @@ public class FileInfoFragment extends Fragment {
             gv.setNumColumns(1);
         }else if(mType == FileInfo.TYPE_MP4){ //视频
             gv.setNumColumns(1);
+        }else if(mType == FileInfo.TYPE_OTHER)
+        {
+            gv.setNumColumns(1);
         }
 
         //Android6.0 requires android.permission.READ_EXTERNAL_STORAGE
@@ -96,6 +100,9 @@ public class FileInfoFragment extends Fragment {
             new GetFileInfoListTask(getContext(), FileInfo.TYPE_MP3).executeOnExecutor(AppContext.MAIN_EXECUTOR);
         } else if (mType == FileInfo.TYPE_MP4) {
             new GetFileInfoListTask(getContext(), FileInfo.TYPE_MP4).executeOnExecutor(AppContext.MAIN_EXECUTOR);
+        }else if(mType ==FileInfo.TYPE_OTHER)
+        {
+            new GetFileInfoListTask(getContext(), FileInfo.TYPE_OTHER).executeOnExecutor(AppContext.MAIN_EXECUTOR);
         }
 
         gv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -213,6 +220,10 @@ public class FileInfoFragment extends Fragment {
             }else if(sType == FileInfo.TYPE_MP4){
                 sFileInfoList = FileUtils.getSpecificTypeFiles(sContext, new String[]{ FileInfo.EXTEND_MP4});
                 sFileInfoList = FileUtils.getDetailFileInfos(sContext, sFileInfoList, FileInfo.TYPE_MP4);
+            }else if(sType ==FileUtils.TYPE_OTHER)
+            {
+                sFileInfoList = FileUtils.getOneDirFiles(sContext, Environment.getExternalStorageDirectory().toString() + "/myapp/picture/2017.3.11/");
+                sFileInfoList = FileUtils.getDetailFileInfos(sContext, sFileInfoList, FileInfo.TYPE_OTHER);
             }
 
             mFileInfoList = sFileInfoList;
@@ -236,6 +247,10 @@ public class FileInfoFragment extends Fragment {
                     gv.setAdapter(mFileInfoAdapter);
                 }else if(mType == FileInfo.TYPE_MP4){ //视频
                     mFileInfoAdapter = new FileInfoAdapter(sContext, sFileInfoList, FileInfo.TYPE_MP4);
+                    gv.setAdapter(mFileInfoAdapter);
+                }else if(mType == FileInfo.TYPE_OTHER)
+                {
+                    mFileInfoAdapter = new FileInfoAdapter(sContext, sFileInfoList, FileInfo.TYPE_OTHER);
                     gv.setAdapter(mFileInfoAdapter);
                 }
             }else{

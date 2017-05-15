@@ -94,8 +94,7 @@ public class HomeActivity extends BaseActivity
     @Bind(R.id.tv_storage_desc)
     TextView tv_storage_desc;
 
-    @Bind(R.id.btn_open)
-    Button btn_o;
+
 
     //大的我要发送和我要接受按钮的LinearLayout的高度
     int mContentHeight = 0;
@@ -277,7 +276,7 @@ public class HomeActivity extends BaseActivity
     }
 
     @OnClick({R.id.btn_send, R.id.btn_receive, R.id.btn_send_big, R.id.btn_receive_big,
-            R.id.rl_device, R.id.rl_file, R.id.rl_storage  })
+            R.id.rl_device, R.id.rl_file, R.id.rl_storage,R.id.btn_test  })
     public void onClick(View view){
         switch (view.getId()) {
             case R.id.btn_send:
@@ -296,9 +295,6 @@ public class HomeActivity extends BaseActivity
 //                }
 //                break;
 //            }
-            case R.id.btn_open:
-                ToastUtils.show(this,"haha it is open");
-                break;
             case R.id.rl_file:
             case R.id.rl_storage: {
                 NavigatorUtils.toSystemFileChooser(getContext());
