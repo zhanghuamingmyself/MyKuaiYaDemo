@@ -13,6 +13,7 @@ import com.zhanghuaming.mykuaiyademo.ui.ChooseReceiverActivity;
 import com.zhanghuaming.mykuaiyademo.ui.FileReceiverActivity;
 import com.zhanghuaming.mykuaiyademo.ui.FileSenderActivity;
 import com.zhanghuaming.mykuaiyademo.ui.ReceiverWaitingActivity;
+import com.zhanghuaming.mykuaiyademo.ui.SettingActivity;
 import com.zhanghuaming.mykuaiyademo.ui.WebTransferActivity;
 
 import java.io.File;
@@ -145,6 +146,21 @@ public class NavigatorUtils {
         }
 
         Intent intent =new Intent(context,HserverActivity.class);
+        context.startActivity(intent);
+    }
+
+
+    /**
+     * 跳转设置
+     */
+    public static void toSettingUI(Context context)
+    {
+        if(context == null)
+        {
+            throw new RuntimeException("Context not be null");
+        }
+
+        Intent intent = new Intent(context, SettingActivity.class);
         context.startActivity(intent);
     }
 }

@@ -31,33 +31,7 @@
 
     </RelativeLayout>
 
-    <LinearLayout
-        android:id="@+id/ll_mini_main"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_alignParentRight="true"
-        android:gravity="center_vertical"
-        android:layout_centerVertical="true"
-        android:alpha="0">
-        <Button
-            android:id="@+id/btn_send"
-            style="@style/style_home_text_view"
-            android:text="@string/str_send"
-            android:layout_marginRight="@dimen/dp_8"/>
-        <Button
-            android:id="@+id/btn_receive"
-            style="@style/style_home_text_view"
-            android:text="@string/str_receive"
-            android:layout_marginRight="@dimen/dp_8"/>
-        <Button
-            android:id="@+id/btn_test"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@style/style_home_text_view"
-            android:text="我要测试"/>
 
-    </LinearLayout>
     <TextView
         android:id="@+id/tv_title"
         android:layout_width="match_parent"

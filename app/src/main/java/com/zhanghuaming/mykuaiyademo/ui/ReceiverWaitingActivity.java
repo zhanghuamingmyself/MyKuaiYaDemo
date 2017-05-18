@@ -233,7 +233,13 @@ public class ReceiverWaitingActivity extends BaseActivity {
         registerReceiver(mWifiAPBroadcastReceiver, filter);
 
         ApMgr.isApOn(getContext()); // check Ap state :boolean
-        String ssid =Constant.MYName+(TextUtils.isNullOrBlank(android.os.Build.DEVICE) ? Constant.DEFAULT_SSID : android.os.Build.DEVICE);
+        String ssid;
+        if(Constant.MYName !=null) {
+           ssid = Constant.MYName;
+        }else
+        {
+           Constant.MYName= ssid =  "ZHM"+ (TextUtils.isNullOrBlank(android.os.Build.DEVICE) ? Constant.DEFAULT_SSID : android.os.Build.DEVICE);
+        }
         ApMgr.configApState(getContext(), ssid); // change Ap state :boolean
 
         tv_device_name.setText(ssid);
@@ -282,6 +288,7 @@ public class ReceiverWaitingActivity extends BaseActivity {
             Thread.sleep(1000);
             localAddress = WifiMgr.getInstance(getContext()).getHotspotLocalIpAddress();
             Log.i(TAG, "receiver get local Ip ----->>>" + localAddress);
+            Constant.localAddress=localAddress;//保存自己的地址
             count ++;
         }
 
@@ -294,6 +301,7 @@ public class ReceiverWaitingActivity extends BaseActivity {
             mDatagramSocket.receive(receivePacket);
             String msg = new String( receivePacket.getData()).trim();
             InetAddress inetAddress = receivePacket.getAddress();
+            Constant.friendIpAddress = inetAddress;//保存对方地址
             int port = receivePacket.getPort();
 //            Log.i(TAG, "Get the msg from FileReceiver######>>>" + Constant.MSG_FILE_RECEIVER_INIT);
             if(msg != null && msg.startsWith(Constant.MSG_FILE_RECEIVER_INIT)){

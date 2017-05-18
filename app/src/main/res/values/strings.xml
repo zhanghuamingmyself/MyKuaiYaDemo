@@ -4,6 +4,8 @@
 
     <string name="str_send">发送</string>
     <string name="str_receive">接收</string>
+    <string name="set">设置</string>
+    <string name="http">HTTP</string>
     <string name="str_start">开启</string>
     <string name="str_stop">关闭</string>
     <string name="action_disable_ap">关闭热点</string>

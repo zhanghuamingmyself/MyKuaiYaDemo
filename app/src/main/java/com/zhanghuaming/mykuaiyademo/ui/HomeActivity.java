@@ -28,6 +28,7 @@ import com.zhanghuaming.mykuaiyademo.Constant;
 import com.zhanghuaming.mykuaiyademo.R;
 import com.zhanghuaming.mykuaiyademo.common.BaseActivity;
 import com.zhanghuaming.mykuaiyademo.core.utils.FileUtils;
+import com.zhanghuaming.mykuaiyademo.core.utils.MLog;
 import com.zhanghuaming.mykuaiyademo.core.utils.TextUtils;
 import com.zhanghuaming.mykuaiyademo.core.utils.ToastUtils;
 import com.zhanghuaming.mykuaiyademo.ui.view.MyScrollView;
@@ -38,7 +39,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class HomeActivity extends BaseActivity
-        implements NavigationView.OnNavigationItemSelectedListener, MyScrollView.OnScrollListener {
+        implements NavigationView.OnNavigationItemSelectedListener{
 
     private static final String TAG = HomeActivity.class.getSimpleName();
 
@@ -56,18 +57,14 @@ public class HomeActivity extends BaseActivity
     /**
      * top bar 相关UI
      */
-    @Bind(R.id.ll_mini_main)
-    LinearLayout ll_mini_main;
+
     @Bind(R.id.tv_title)
     TextView tv_title;
-//    @Bind(R.id.iv_mini_avator)
-//    ImageView iv_mini_avator;
-    @Bind(R.id.btn_send)
-    Button btn_send;
-    @Bind(R.id.btn_receive)
-    Button btn_receive;
-    @Bind(R.id.btn_test)
-    Button btn_test;
+
+    @Bind(R.id.btn_set)
+    Button btn_set;
+    @Bind(R.id.btn_http)
+    Button btn_http;
 
     /**
      * 其他UI
@@ -124,6 +121,12 @@ public class HomeActivity extends BaseActivity
     }
 
     @Override
+    protected void onRestart() {
+        super.onRestart();
+        refreshNavigation();
+    }
+
+    @Override
     protected void onResume() {
         updateBottomData();
         super.onResume();
@@ -150,33 +153,36 @@ public class HomeActivity extends BaseActivity
      * 初始化
      */
     private void init() {
+
+        initNavigation();
+        updateBottomData();
+
+    }
+
+    /**
+     * 初始化侧边栏
+     */
+    public void initNavigation()
+    {
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, mDrawerLayout, null, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         mDrawerLayout.setDrawerListener(toggle);
         toggle.syncState();
-
-        mNavigationView = (NavigationView) findViewById(R.id.nav_view);
         mNavigationView.setNavigationItemSelectedListener(this);
 
+        refreshNavigation();
+    }
+
+    private void refreshNavigation() {
         //设置设备名称
-        String device = TextUtils.isNullOrBlank(android.os.Build.DEVICE) ? Constant.DEFAULT_SSID : android.os.Build.DEVICE;
+        String device = Constant.MYName;
         try{//设置左边抽屉的设备名称
             tv_name = (TextView) mNavigationView.getHeaderView(0).findViewById(R.id.tv_name);
             tv_name.setText(device);
         }catch(Exception e){
             //maybe occur some exception
         }
-
-        mScrollView.setOnScrollListener(this);
-
-        ll_mini_main.setClickable(false);
-        ll_mini_main.setVisibility(View.GONE);
-
-        updateBottomData();
-
-
     }
-
 
     /**
      * 更新底部 设备数，文件数，节省流量数的数据
@@ -216,28 +222,6 @@ public class HomeActivity extends BaseActivity
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.home, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            mDrawerLayout.openDrawer(GravityCompat.START);
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
@@ -245,38 +229,23 @@ public class HomeActivity extends BaseActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-//        if (id == R.id.nav_camera) {
-//            // Handle the camera action
-//        } else if (id == R.id.nav_gallery) {
-//
-//        } else if (id == R.id.nav_slideshow) {
-//
-//        } else if (id == R.id.nav_manage) {
-//
-//        } else if (id == R.id.nav_share) {
-//
-//        } else if (id == R.id.nav_send) {
-//
-//        }
 
         if(id == R.id.nav_about){
-            Log.i(TAG, "R.id.nav_about------>>> click");
+            MLog.i(TAG, "R.id.nav_about------>>> click");
             showAboutMeDialog();
         }else if(id == R.id.nav_web_transfer){
-            Log.i(TAG, "R.id.nav_web_transfer------>>> click");
-//            NavigatorUtils.toWebTransferUI(getContext());
+            MLog.i(TAG, "R.id.nav_web_transfer------>>> click");
             NavigatorUtils.toChooseFileUI(getContext(), true);
         }else{
             ToastUtils.show(getContext(), getResources().getString(R.string.tip_next_version_update));
         }
 
-//        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
 
-    @OnClick({R.id.btn_send, R.id.btn_receive, R.id.btn_send_big, R.id.btn_receive_big,
-            R.id.rl_device, R.id.rl_file, R.id.rl_storage,R.id.btn_test  })
+    @OnClick({R.id.btn_send_big, R.id.btn_receive_big,
+            R.id.btn_set, R.id.rl_file, R.id.rl_storage,R.id.rl_device ,R.id.btn_http })
     public void onClick(View view){
         switch (view.getId()) {
             case R.id.btn_send:
@@ -284,54 +253,34 @@ public class HomeActivity extends BaseActivity
                 NavigatorUtils.toChooseFileUI(getContext());
                 break;
             }
-            case R.id.btn_receive:
+
             case R.id.btn_receive_big: {
                 NavigatorUtils.toReceiverWaitingUI(getContext());
                 break;
             }
-//            case R.id.iv_mini_avator: {
-//                if(mDrawerLayout != null){
-//                    mDrawerLayout.openDrawer(GravityCompat.START);
-//                }
-//                break;
-//            }
+
+            case R.id.rl_device:
+
+                break;
             case R.id.rl_file:
+
+                break;
             case R.id.rl_storage: {
                 NavigatorUtils.toSystemFileChooser(getContext());
                 break;
             }
-            case R.id.btn_test:
+            case R.id.btn_set:
+                ToastUtils.show(this,"just a test");
+                NavigatorUtils.toSettingUI(getContext());
+                break;
+            case R.id.btn_http:
                 ToastUtils.show(this,"just a test");
                 NavigatorUtils.toHTTPServerUI(getContext());
                 break;
         }
     }
 
-    //自定义ScrollView的监听
-    @Override
-    public void onScrollChanged(int l, int t, int oldl, int oldt) {
-        Log.i(TAG, "l-->" + l + ",t-->" + t + ",oldl-->" + oldl + ",oldt-->" + oldt);
-        mContentHeight = ll_main.getMeasuredHeight();
-//        Log.i(TAG, "content height : " + mContentHeight);
-//        float alpha = t / (float)mContentHeight;
-//        Log.i(TAG, "content alpha : " + alpha);
-//        tv_title.setAlpha(alpha);
-        //一半的位置时候
-        // topbar上面的两个小按钮 跟 主页上面的两个大按钮的alpha值是对立的 即 alpha 与 1-alpha的关系
-        if(t > mContentHeight / 2){
-            float sAlpha = (t - mContentHeight / 2) /  (float)(mContentHeight / 2);
-            ll_mini_main.setVisibility(View.VISIBLE);
-            ll_main.setAlpha(1-sAlpha);
-            ll_mini_main.setAlpha(sAlpha);
-            tv_title.setAlpha(0);
-        } else{
-            float tAlpha = t / (float)mContentHeight / 2;
-            tv_title.setAlpha(1 - tAlpha);
-            ll_mini_main.setVisibility(View.INVISIBLE);
-            ll_mini_main.setAlpha(0);
-        }
 
-    }
 
     /**
      * 显示对话框

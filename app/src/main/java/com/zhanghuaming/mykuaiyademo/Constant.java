@@ -47,7 +47,7 @@ public class Constant {
     /**
     * 我的SSID名字
      */
-    public static String MYName ="ZHM";
+    public static String MYName;
 
     /**
      * Android微型服务器 默认端口
@@ -114,10 +114,11 @@ public class Constant {
 
 
     /**
-     * 连接建立后保留对方的信息
+     * 连接建立后保留的信息
      */
-    private String friendName;
-    private int serverPort;
-    private InetAddress ipAddress;
+    public static String localAddress;
+    public static String friendName;
+    public static int serverPort;
+    public static InetAddress friendIpAddress;
 }
 
