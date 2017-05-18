@@ -152,10 +152,10 @@ public class FileInfoAdapter extends CommonAdapter<FileInfo> {
                 }
             }
         }
-        else if(mType == FileInfo.TYPE_OTHER){ //MP4 convertView
+        else if(mType == FileInfo.TYPE_OTHER){ //Other convertView
             OtherViewHolder viewHolder = null;
             if(convertView == null){
-                convertView = View.inflate(getContext(), R.layout.item_mp4, null);
+                convertView = View.inflate(getContext(), R.layout.item_other, null);
                 viewHolder = new OtherViewHolder();
                 viewHolder.iv_shortcut = (ImageView) convertView.findViewById(R.id.iv_shortcut);
                 viewHolder.iv_ok_tick = (ImageView) convertView.findViewById(R.id.iv_ok_tick);

@@ -1,10 +1,14 @@
 package com.zhanghuaming.mykuaiyademo.ui;
 
 import android.Manifest;
+import android.content.ComponentName;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -20,6 +24,7 @@ import com.zhanghuaming.mykuaiyademo.R;
 import com.zhanghuaming.mykuaiyademo.common.BaseActivity;
 import com.zhanghuaming.mykuaiyademo.core.FileSender;
 import com.zhanghuaming.mykuaiyademo.core.entity.FileInfo;
+import com.zhanghuaming.mykuaiyademo.core.service.SenderService;
 import com.zhanghuaming.mykuaiyademo.core.utils.FileUtils;
 import com.zhanghuaming.mykuaiyademo.core.utils.ToastUtils;
 import com.zhanghuaming.mykuaiyademo.core.utils.WifiMgr;
@@ -349,4 +354,39 @@ public class FileSenderActivity extends BaseActivity {
         }
     }
 
+    private SenderService senderService = new SenderService();
+    private Boolean bound = false;//是否綁定service
+    private void BindSenderService()
+    {
+        Intent i = new Intent(FileSenderActivity.this,SenderService.class);
+        bindService(i, sc, BIND_AUTO_CREATE);
+        if(bound)
+        {
+
+
+        }
+    }
+    private void unBindSenderService()
+    {
+        unbindService(sc);;
+    }
+    private ServiceConnection sc = new ServiceConnection()
+    {
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            // TODO Auto-generated method stub
+            SenderService.LocalBinder binder = (SenderService.LocalBinder)service;
+            senderService = binder.getService();
+            bound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            // TODO Auto-generated method stub
+
+            bound =false;
+        }
+
+    };
 }

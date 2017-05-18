@@ -38,6 +38,7 @@ public class FileInfo implements Serializable {
     public static final int TYPE_MP4 = 4;
 
     public static final int TYPE_OTHER = 5;
+    public static final int TYPE_DIR = 6;
 
 
     /**
@@ -97,7 +98,22 @@ public class FileInfo implements Serializable {
     private int result;
 
 
+    /**
+     *  是否为目录
+     */
+     private  Boolean isDir = false;
+
+
+    public Boolean getIsDir() {
+        return isDir;
+    }
+
+    public void setIsDir(Boolean dir) {
+        isDir = dir;
+    }
+
     public FileInfo(){
+
 
     }
 
@@ -106,6 +122,16 @@ public class FileInfo implements Serializable {
         this.size = size;
     }
 
+    public Boolean getIsBack() {
+        return isBack;
+    }
+
+    private Boolean isBack = false;
+    public FileInfo(String filePath, long size,Boolean isBack) {
+        this.filePath = filePath;
+        this.size = size;
+        this.isBack = isBack;
+    }
     public long getSize() {
         return size;
     }

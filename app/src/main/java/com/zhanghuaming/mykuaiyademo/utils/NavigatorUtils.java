@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
+import com.zhanghuaming.myhttpserver.HserverActivity;
 import com.zhanghuaming.mykuaiyademo.Constant;
 import com.zhanghuaming.mykuaiyademo.core.utils.FileUtils;
 import com.zhanghuaming.mykuaiyademo.ui.ChooseFileActivity;
@@ -131,4 +132,19 @@ public class NavigatorUtils {
         context.startActivity(intent);
     }
 
+
+    /**
+     * 跳转http服务器
+     *
+     */
+    public static void toHTTPServerUI(Context context)
+    {
+        if(context == null)
+        {
+            throw new RuntimeException("Context not be null");
+        }
+
+        Intent intent =new Intent(context,HserverActivity.class);
+        context.startActivity(intent);
+    }
 }

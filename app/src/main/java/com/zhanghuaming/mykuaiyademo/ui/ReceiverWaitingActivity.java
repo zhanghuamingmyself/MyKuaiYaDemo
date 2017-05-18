@@ -233,7 +233,7 @@ public class ReceiverWaitingActivity extends BaseActivity {
         registerReceiver(mWifiAPBroadcastReceiver, filter);
 
         ApMgr.isApOn(getContext()); // check Ap state :boolean
-        String ssid = TextUtils.isNullOrBlank(android.os.Build.DEVICE) ? Constant.DEFAULT_SSID : android.os.Build.DEVICE;
+        String ssid ="华明"+(TextUtils.isNullOrBlank(android.os.Build.DEVICE) ? Constant.DEFAULT_SSID : android.os.Build.DEVICE);
         ApMgr.configApState(getContext(), ssid); // change Ap state :boolean
 
         tv_device_name.setText(ssid);

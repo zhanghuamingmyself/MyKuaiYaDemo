@@ -79,7 +79,6 @@ public class ChooseFileActivity extends BaseActivity {
     FileInfoFragment mJpgInfoFragment;
     FileInfoFragment mMp3InfoFragment;
     FileInfoFragment mMp4InfoFragment;
-
     FileInfoFragment otherFileFragment;
 
     /**
@@ -334,8 +333,7 @@ public class ChooseFileActivity extends BaseActivity {
                 mCurrentFragment = mMp3InfoFragment;
             }else if(position == 3){ //视频
                 mCurrentFragment = mMp4InfoFragment;
-            }else if(position ==4)
-            {
+            }else if(position ==4) {
                 mCurrentFragment = otherFileFragment;
             }
             return mCurrentFragment;

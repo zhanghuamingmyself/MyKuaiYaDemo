@@ -2,9 +2,9 @@ package com.zhanghuaming.mykuaiyademo;
 
 import com.zhanghuaming.mykuaiyademo.core.entity.FileInfo;
 
+import java.net.InetAddress;
 import java.util.Comparator;
 import java.util.Map;
-
 
 
 /**
@@ -14,6 +14,7 @@ import java.util.Map;
  */
 public class Constant {
 
+    private static final String TAG = "Constant";
     /**
      * 默认的Wifi SSID
      */
@@ -43,8 +44,10 @@ public class Constant {
      * UDP通信服务 默认端口
      */
     public static final int DEFAULT_SERVER_COM_PORT = 8099;
-
-
+    /**
+    * 我的SSID名字
+     */
+    public static String MYName ="ZHM";
 
     /**
      * Android微型服务器 默认端口
@@ -73,28 +76,27 @@ public class Constant {
     public static final String MSG_FILE_SENDER_START = "MSG_FILE_SENDER_START";
 
 
-
     //FileInfoMap 默认的Comparator
-    public static final Comparator<Map.Entry<String, FileInfo>> DEFAULT_COMPARATOR =      new Comparator<Map.Entry<String, FileInfo>>() {
+    public static final Comparator<Map.Entry<String, FileInfo>> DEFAULT_COMPARATOR = new Comparator<Map.Entry<String, FileInfo>>() {
         public int compare(Map.Entry<String, FileInfo> o1, Map.Entry<String, FileInfo> o2) {
-            if(o1.getValue().getFileType() > o2.getValue().getFileType()){
+            if (o1.getValue().getFileType() > o2.getValue().getFileType()) {
                 return 1;
-            } else if(o1.getValue().getFileType() < o2.getValue().getFileType()){
+            } else if (o1.getValue().getFileType() < o2.getValue().getFileType()) {
                 return -1;
-            }else{
+            } else {
                 return 0;
             }
         }
     };
 
-//    FileInfoMap 默认的Comparator2
+    //    FileInfoMap 默认的Comparator2
     public static final Comparator<FileInfo> DEFAULT_COMPARATOR2 = new Comparator<FileInfo>() {
         public int compare(FileInfo o1, FileInfo o2) {
-            if(o1.getFileType() > o2.getFileType()){
+            if (o1.getFileType() > o2.getFileType()) {
                 return 1;
-            } else if(o1.getFileType() < o2.getFileType()){
+            } else if (o1.getFileType() < o2.getFileType()) {
                 return -1;
-            }else{
+            } else {
                 return 0;
             }
         }
@@ -109,5 +111,13 @@ public class Constant {
      */
     public static final String NAME_FILE_TEMPLATE = "file.template";
     public static final String NAME_CLASSIFY_TEMPLATE = "classify.template";
+
+
+    /**
+     * 连接建立后保留对方的信息
+     */
+    private String friendName;
+    private int serverPort;
+    private InetAddress ipAddress;
 }
 

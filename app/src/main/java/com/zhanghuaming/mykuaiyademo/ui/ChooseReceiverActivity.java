@@ -21,6 +21,7 @@ import com.zhanghuaming.mykuaiyademo.R;
 import com.zhanghuaming.mykuaiyademo.common.BaseActivity;
 import com.zhanghuaming.mykuaiyademo.core.BaseTransfer;
 import com.zhanghuaming.mykuaiyademo.core.entity.FileInfo;
+import com.zhanghuaming.mykuaiyademo.core.utils.MLog;
 import com.zhanghuaming.mykuaiyademo.core.utils.ToastUtils;
 import com.zhanghuaming.mykuaiyademo.core.utils.WifiMgr;
 import com.zhanghuaming.mykuaiyademo.ui.adapter.WifiScanResultAdapter;
@@ -287,12 +288,12 @@ public class ChooseReceiverActivity extends BaseActivity {
         //0.发送 即将发送的文件列表 到文件接收方
         sendFileInfoListToFileReceiverWithUdp(serverPort, ipAddress);
 
-        //1.发送 文件接收方 初始化
+        //1.发送 文件接收方 初始化信息
         sendData = Constant.MSG_FILE_RECEIVER_INIT.getBytes(BaseTransfer.UTF_8);
         DatagramPacket sendPacket =
                 new DatagramPacket(sendData, sendData.length, ipAddress, serverPort);
         mDatagramSocket.send(sendPacket);
-        Log.i(TAG, "Send Msg To FileReceiver######>>>" + Constant.MSG_FILE_RECEIVER_INIT);
+        MLog.i(TAG, "Send Msg To FileReceiver######>>>" + Constant.MSG_FILE_RECEIVER_INIT);
 
 //        sendFileInfoListToFileReceiverWithUdp(serverPort, ipAddress);
 
@@ -302,7 +303,7 @@ public class ChooseReceiverActivity extends BaseActivity {
             DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
             mDatagramSocket.receive(receivePacket);
             String response = new String( receivePacket.getData(), BaseTransfer.UTF_8).trim();
-            Log.i(TAG, "Get the msg from FileReceiver######>>>" + response);
+            MLog.i(TAG, "Get the msg from FileReceiver######>>>" + response);
             if(response != null && response.equals(Constant.MSG_FILE_RECEIVER_INIT_SUCCESS)){
                 // 进入文件发送列表界面 （并且通知文件接收方进入文件接收列表界面）
                 mHandler.obtainMessage(MSG_TO_FILE_SENDER_UI).sendToTarget();
@@ -332,9 +333,9 @@ public class ChooseReceiverActivity extends BaseActivity {
                         new DatagramPacket(fileInfoStr.getBytes(), fileInfoStr.getBytes().length, ipAddress, serverPort);
                 try{
                     mDatagramSocket.send(sendFileInfoListPacket);
-                    Log.i(TAG, "sendFileInfoListToFileReceiverWithUdp------>>>" + fileInfoStr + "=== Success!");
+                    MLog.i(TAG, "sendFileInfoListToFileReceiverWithUdp------>>>" + fileInfoStr + "=== Success!");
                 }catch (Exception e){
-                    Log.i(TAG, "sendFileInfoListToFileReceiverWithUdp------>>>" + fileInfoStr + "=== Failure!");
+                    MLog.i(TAG, "sendFileInfoListToFileReceiverWithUdp------>>>" + fileInfoStr + "=== Failure!");
                 }
 
             }

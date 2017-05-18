@@ -302,6 +302,7 @@ public class HomeActivity extends BaseActivity
             }
             case R.id.btn_test:
                 ToastUtils.show(this,"just a test");
+                NavigatorUtils.toHTTPServerUI(getContext());
                 break;
         }
     }

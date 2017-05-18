@@ -2,6 +2,9 @@ package com.zhanghuaming.mykuaiyademo.utils;
 
 import android.net.wifi.ScanResult;
 
+import com.zhanghuaming.mykuaiyademo.Constant;
+import com.zhanghuaming.mykuaiyademo.core.utils.MLog;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,6 +13,8 @@ import java.util.List;
  * Contact me zhanghuamingmyself@163.com
  */
 public class ListUtils {
+
+    private static final String TAG = "ListUtils";
     public static final String NO_PASSWORD = "[ESS]";
     public static final String NO_PASSWORD_WPS = "[WPS][ESS]";
 
@@ -26,7 +31,11 @@ public class ListUtils {
         List<ScanResult> resultList = new ArrayList<>();
         for(ScanResult scanResult : scanResultList){
             if(scanResult.capabilities != null && scanResult.capabilities.equals(NO_PASSWORD) || scanResult.capabilities != null && scanResult.capabilities.equals(NO_PASSWORD_WPS)){
-                resultList.add(scanResult);
+                MLog.e(TAG,"scan Wifi SSID id -----"+scanResult.SSID);
+                if(scanResult.SSID.startsWith(Constant.MYName)) {
+
+                    resultList.add(scanResult);
+                }
             }
         }
 

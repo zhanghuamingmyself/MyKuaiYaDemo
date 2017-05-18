@@ -16,6 +16,7 @@ import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.zhanghuaming.mykuaiyademo.R;
 import com.zhanghuaming.mykuaiyademo.core.entity.FileInfo;
@@ -52,12 +53,12 @@ public class FileUtils {
     /**
      * 默认的根目录
      */
-    public static final String DEFAULT_ROOT_PATH = "/mnt/download/kuaichuan/";
+    public static final String DEFAULT_ROOT_PATH = "/mnt/download/kuaiya/";
 
     /**
      * 默认的缩略图目录
      */
-    public static final String DEFAULT_SCREENSHOT_PATH = "/mnt/kc_screenshot/";
+    public static final String DEFAULT_SCREENSHOT_PATH = "/mnt/ky_screenshot/";
 
     /**
      * 小数的格式化
@@ -133,16 +134,25 @@ public class FileUtils {
         List<FileInfo> fileInfoList = new ArrayList<FileInfo>();
 
         File path = new File(p);
-        Log.e(TAG,"File name is ====="+path.getPath());
-        if (path.isDirectory()) {
+        Log.e(TAG," open File name is ====="+path.getPath());
+        if (path.isDirectory() &&!path.isHidden()) {
             for (File f : path.listFiles()) {
                 Log.e(TAG,"File name is ====="+f.getPath());
                 FileInfo fileInfo = new FileInfo();
-                fileInfo.setFilePath(f.getPath());
-                fileInfo.setSize(f.length());
+                if(f.isDirectory() &&!path.isHidden())
+                {
+                    fileInfo.setSizeDesc(null);
+                    fileInfo.setIsDir(true);
+                    fileInfo.setFilePath(f.getPath());
+                }else
+                {
+                    fileInfo.setFilePath(f.getPath());
+                    fileInfo.setSize(f.length());
+                }
                 fileInfoList.add(fileInfo);
             }
         }
+        Log.e(TAG,"Return name is ====="+fileInfoList.size());
         return fileInfoList;
     }
 
@@ -190,7 +200,13 @@ public class FileUtils {
                 } else if (type == FileInfo.TYPE_JPG) {//由Glide图片加载框架加载
 
                 } else if (type == FileInfo.TYPE_OTHER) {
-
+                    File f =new File(fileInfo.getFilePath());
+                    if(f.isDirectory()) {
+                        fileInfo.setBitmap(FileUtils.getDirIcon(context));
+                    }
+                    else {
+                        fileInfo.setBitmap(FileUtils.getOtherFileIcon(context , fileInfo.getFilePath(),FileUtils.TYPE_OTHER));
+                    }
                 }
                 fileInfo.setFileType(type);
             }
@@ -218,7 +234,7 @@ public class FileUtils {
     public static String getRootDirPath() {
         String path = DEFAULT_ROOT_PATH;
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            path = Environment.getExternalStorageDirectory() + "/kuaichuan/";
+            path = Environment.getExternalStorageDirectory() + "/kuaiya/";
         }
         return path;
     }
@@ -603,6 +619,46 @@ public class FileUtils {
     }
 
 
+    /**
+     * 获取文件夹图标
+     *
+     */
+
+    public static Bitmap getDirIcon(Context context)
+    {
+        return BitmapFactory.decodeResource(context.getResources(), R.mipmap.folder);
+    }
+
+
+    /**
+     * 获取其他文件图标
+     *
+     */
+
+    public static Bitmap getOtherFileIcon(Context context,String filePath,int type)
+    {
+        if(FileUtils.isApkFile(filePath))
+        {
+            return  FileUtils.drawableToBitmap(FileUtils.getApkThumbnail(context,filePath));
+        }else if(FileUtils.isJpgFile(filePath))
+        {
+            return BitmapFactory.decodeResource(context.getResources(), R.mipmap.file);
+        }else if(FileUtils.isMp3File(filePath))
+        {
+            return  FileUtils.createAlbumArt(filePath);
+        }else if(FileUtils.isMp4File(filePath))
+        {
+            return FileUtils.getScreenshotBitmap(context, filePath, FileInfo.TYPE_MP4);
+        }else if(FileUtils.isPngFile(filePath))
+        {
+            return BitmapFactory.decodeResource(context.getResources(), R.mipmap.file);
+        }
+        else return BitmapFactory.decodeResource(context.getResources(), R.mipmap.file);
+
+
+    }
+
+
     //----------------------------
     //1.压缩功能， 压缩到指定大小
     //2.Drawable --->>> Bitmap
@@ -846,6 +902,10 @@ public class FileUtils {
         } else if (FileUtils.isMp4File(filePath)) {//视屏格式
 //            "video/*"
             intent.setDataAndType(uri, "video/*");
+        }else
+        {
+            ToastUtils.show(context,"暂时无法打开此文件，请用文件浏览器打开");
+            return;
         }
         context.startActivity(intent);
     }
@@ -867,7 +927,7 @@ public class FileUtils {
             localFilePath = getSpecifyDirPath(FileInfo.TYPE_MP3) + getFileName(remoteFilePath);
         } else if (FileUtils.isMp4File(remoteFilePath)) {//视屏格式
             localFilePath = getSpecifyDirPath(FileInfo.TYPE_MP4) + getFileName(remoteFilePath);
-        } else {
+        } else {//其他文件
             localFilePath = getSpecifyDirPath(FileInfo.TYPE_OTHER) + getFileName(remoteFilePath);
         }
         return localFilePath;
