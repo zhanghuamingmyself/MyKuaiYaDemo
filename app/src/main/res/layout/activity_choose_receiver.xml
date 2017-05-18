@@ -31,6 +31,7 @@
         android:layout_marginRight="@dimen/activity_horizontal_margin"/>
 
     <ListView
+        android:layout_below="@+id/radarView"
         android:id="@+id/lv_result"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

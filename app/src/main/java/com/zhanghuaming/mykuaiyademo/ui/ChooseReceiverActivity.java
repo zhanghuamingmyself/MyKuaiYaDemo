@@ -96,7 +96,6 @@ public class ChooseReceiverActivity extends BaseActivity {
                 finishNormal();
             }else if(msg.what == MSG_TO_SHOW_SCAN_RESULT){
                 getOrUpdateWifiScanResult();
-                mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_TO_SHOW_SCAN_RESULT), 1000);
             }
         }
     };
@@ -226,9 +225,8 @@ public class ChooseReceiverActivity extends BaseActivity {
                 break;
             }
             case R.id.radarView:{
-                Log.i(TAG, "radarView ------>>> click!");
-                mUdpServerRuannable = createSendMsgToServerRunnable(WifiMgr.getInstance(getContext()).getIpAddressFromHotspot());
-                AppContext.MAIN_EXECUTOR.execute(mUdpServerRuannable);
+                MLog.i(TAG, "radarView ------>>> click!");
+                getOrUpdateWifiScanResult();
                 break;
             }
         }
