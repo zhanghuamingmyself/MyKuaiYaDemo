@@ -1,12 +1,19 @@
 package com.zhanghuaming.mykuaiyademo.ui;
 
 import android.Manifest;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.net.wifi.ScanResult;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -19,8 +26,9 @@ import com.zhanghuaming.mykuaiyademo.AppContext;
 import com.zhanghuaming.mykuaiyademo.Constant;
 import com.zhanghuaming.mykuaiyademo.R;
 import com.zhanghuaming.mykuaiyademo.common.BaseActivity;
-import com.zhanghuaming.mykuaiyademo.core.BaseTransfer;
-import com.zhanghuaming.mykuaiyademo.core.entity.FileInfo;
+import com.zhanghuaming.mykuaiyademo.core.entity.IpPortInfo;
+import com.zhanghuaming.mykuaiyademo.core.service.SenderMsgService;
+import com.zhanghuaming.mykuaiyademo.core.utils.ApMgr;
 import com.zhanghuaming.mykuaiyademo.core.utils.MLog;
 import com.zhanghuaming.mykuaiyademo.core.utils.ToastUtils;
 import com.zhanghuaming.mykuaiyademo.core.utils.WifiMgr;
@@ -30,19 +38,16 @@ import com.zhanghuaming.mykuaiyademo.utils.ListUtils;
 import com.zhanghuaming.mykuaiyademo.utils.NavigatorUtils;
 import com.zhanghuaming.mykuaiyademo.utils.NetUtils;
 
-import java.io.IOException;
-import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static com.zhanghuaming.mykuaiyademo.core.service.SenderMsgService.MSG_TO_FILE_SENDER_UI;
+import static com.zhanghuaming.mykuaiyademo.core.service.SenderMsgService.MSG_TO_SHOW_SCAN_RESULT;
 
 
 /**
@@ -81,22 +86,32 @@ public class ChooseReceiverActivity extends BaseActivity {
     /**
      * 与 文件发送方 通信的 线程
      */
-    Runnable mUdpServerRuannable;
 
 
-    public static final int MSG_TO_FILE_SENDER_UI = 0X88;   //消息：跳转到文件发送列表UI
-    public static final int MSG_TO_SHOW_SCAN_RESULT = 0X99; //消息：更新扫描可连接Wifi网络的列表
+    Handler mHandler = new Handler() {
 
-    Handler mHandler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
-            if(msg.what == MSG_TO_FILE_SENDER_UI){
-                ToastUtils.show(getContext(), "进入文件发送列表");
-                NavigatorUtils.toFileSenderListUI(getContext());
-                finishNormal();
-            }else if(msg.what == MSG_TO_SHOW_SCAN_RESULT){
+             if (msg.what == MSG_TO_SHOW_SCAN_RESULT) {
                 getOrUpdateWifiScanResult();
             }
+
+        }
+    };
+    int count = 0;
+    Runnable Scan = new Runnable() {
+        @Override
+        public void run() {
+            while (count < Constant.DEFAULT_TRY_TIME  && !(ApMgr.isApOn(ChooseReceiverActivity.this))) {
+                mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_TO_SHOW_SCAN_RESULT), 1000);
+                count++;
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            count = 0;
         }
     };
 
@@ -110,22 +125,13 @@ public class ChooseReceiverActivity extends BaseActivity {
         init();
     }
 
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        closeSocket();
 
-        //断开当前的Wifi网络
-        WifiMgr.getInstance(getContext()).disconnectCurrentNetwork();
-
-        this.finish();
-    }
 
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == REQUEST_CODE_OPEN_GPS) {
-            if (grantResults.length>0&&grantResults[0] == PackageManager.PERMISSION_GRANTED){
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // 允许
                 updateUI();
             } else {
@@ -138,18 +144,12 @@ public class ChooseReceiverActivity extends BaseActivity {
     }
 
 
-    /**
-     * 成功进入 文件发送列表UI 调用的finishNormal()
-     */
-    private void finishNormal(){
-        closeSocket();
-        this.finish();
-    }
+
 
     /**
      * 初始化
      */
-    private void init(){
+    private void init() {
         radarScanView.startScan();
 
 //        if(WifiMgr.getInstance(getContext()).isWifiEnable()){//wifi打开的情况
@@ -157,13 +157,13 @@ public class ChooseReceiverActivity extends BaseActivity {
 //            WifiMgr.getInstance(getContext()).openWifi();
 //        }
 
-        if(!WifiMgr.getInstance(getContext()).isWifiEnable()) {//wifi未打开的情况
+        if (!WifiMgr.getInstance(getContext()).isWifiEnable()) {//wifi未打开的情况
             WifiMgr.getInstance(getContext()).openWifi();
         }
 
         //Android 6.0 扫描wifi 需要开启定位
-        if (Build.VERSION.SDK_INT >= 23 ) { //Android 6.0 扫描wifi 需要开启定位
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission_group.LOCATION)!= PackageManager.PERMISSION_GRANTED){
+        if (Build.VERSION.SDK_INT >= 23) { //Android 6.0 扫描wifi 需要开启定位
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission_group.LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 // 获取wifi连接需要定位权限,没有获取权限
                 ActivityCompat.requestPermissions(this, new String[]{
                         Manifest.permission.ACCESS_FINE_LOCATION,
@@ -172,7 +172,7 @@ public class ChooseReceiverActivity extends BaseActivity {
                 }, REQUEST_CODE_OPEN_GPS);
                 return;
             }
-        }else{//Android 6.0 以下的直接开启扫描
+        } else {//Android 6.0 以下的直接开启扫描
             updateUI();
         }
     }
@@ -180,70 +180,64 @@ public class ChooseReceiverActivity extends BaseActivity {
     /**
      * 更新UI
      */
-    private void updateUI(){
-        getOrUpdateWifiScanResult();
-        mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_TO_SHOW_SCAN_RESULT), 1000);
+    private void updateUI() {
+            getOrUpdateWifiScanResult();
+            new Thread(Scan).start();
     }
 
     /**
      * 获取或者更新wifi扫描列表
      */
-    private void getOrUpdateWifiScanResult(){
+
+
+    private void getOrUpdateWifiScanResult() {
+
         WifiMgr.getInstance(getContext()).startScan();
         mScanResultList = WifiMgr.getInstance(getContext()).getScanResultList();
-        mScanResultList = ListUtils.filterWithNoPassword(mScanResultList);
+        mScanResultList = ListUtils.filterWithNoPassword(mScanResultList);//过滤没用的网络
 
-        if(mScanResultList != null){
-            mWifiScanResultAdapter = new WifiScanResultAdapter(getContext(),mScanResultList);
+        if (mScanResultList != null) {
+            mWifiScanResultAdapter = new WifiScanResultAdapter(getContext(), mScanResultList);
             lv_result.setAdapter(mWifiScanResultAdapter);
-            lv_result.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    //TODO 进入文件传输部分
-                    ScanResult scanResult = mScanResultList.get(position);
-                    Log.i(TAG, "###select the wifi info ======>>>" + scanResult.toString());
-
-                    //1.连接网络
-                    String ssid = Constant.DEFAULT_SSID;
-                    ssid = scanResult.SSID;
-                    WifiMgr.getInstance(getContext()).openWifi();
-                    WifiMgr.getInstance(getContext()).addNetwork(WifiMgr.createWifiCfg(ssid, null, WifiMgr.WIFICIPHER_NOPASS));
-
-                    //2.发送UDP通知信息到 文件接收方 开启ServerSocketRunnable
-                    mUdpServerRuannable = createSendMsgToServerRunnable(WifiMgr.getInstance(getContext()).getIpAddressFromHotspot());
-                    AppContext.MAIN_EXECUTOR.execute(mUdpServerRuannable);
-                }
-            });
         }
-    }
+        lv_result.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                //TODO 进入文件传输部分
+                ScanResult scanResult = mScanResultList.get(position);
+                Log.i(TAG, "###select the wifi info ======>>>" + scanResult.toString());
 
-    @OnClick({R.id.tv_back, R.id.radarView})
-    public void onClick(View view){
-        switch (view.getId()){
-            case R.id.tv_back:{
-                onBackPressed();
-                break;
-            }
-            case R.id.radarView:{
-                MLog.i(TAG, "radarView ------>>> click!");
-                getOrUpdateWifiScanResult();
-                break;
-            }
-        }
-    }
+                //1.连接网络
+                String ssid = Constant.DEFAULT_SSID;
+                ssid = scanResult.SSID;
+                WifiMgr.getInstance(getContext()).openWifi();
+                WifiMgr.getInstance(getContext()).addNetwork(WifiMgr.createWifiCfg(ssid, null, WifiMgr.WIFICIPHER_NOPASS));
 
+
+                //开始连接
+                startConnectServer();
+            }
+        });
+
+    }
+    public void startConnectServer() {
+        String addr;
+        addr = WifiMgr.getInstance(ChooseReceiverActivity.this).getIpAddressFromHotspot();
+        AppContext.MAIN_EXECUTOR.execute(createConnectRunnable(addr));
+    }
 
     /**
      * 创建发送UDP消息到 文件接收方 的服务线程
+     *
      * @param serverIP
      */
-    private Runnable createSendMsgToServerRunnable(final String serverIP){
+    public Runnable createConnectRunnable(final String serverIP) {
         Log.i(TAG, "receiver serverIp ----->>>" + serverIP);
-        return new Runnable(){
+        return new Runnable() {
             @Override
             public void run() {
                 try {
-                    startFileSenderServer(serverIP, Constant.DEFAULT_SERVER_COM_PORT);
+                    startConnectServer(serverIP, Constant.DEFAULT_SERVER_COM_PORT);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -251,104 +245,70 @@ public class ChooseReceiverActivity extends BaseActivity {
         };
     }
 
-
     /**
      * 开启 文件发送方 通信服务 (必须在子线程执行)
+     *
      * @param targetIpAddr
      * @param serverPort
      * @throws Exception
      */
-    DatagramSocket mDatagramSocket;
-    private void startFileSenderServer(String targetIpAddr, int serverPort) throws Exception {
+
+    private void startConnectServer(String targetIpAddr, int serverPort) throws Exception {
 //        Thread.sleep(3*1000);
         // 确保Wifi连接上之后获取得到IP地址
         int count = 0;
-        while(targetIpAddr.equals(Constant.DEFAULT_UNKOWN_IP) && count < Constant.DEFAULT_TRY_TIME){
+        while (targetIpAddr.equals(Constant.DEFAULT_UNKOWN_IP) && count < Constant.DEFAULT_TRY_TIME) {
             Thread.sleep(1000);
-            targetIpAddr = WifiMgr.getInstance(getContext()).getIpAddressFromHotspot();
-            Log.i(TAG, "receiver serverIp ----->>>" + targetIpAddr);
-            count ++;
+            targetIpAddr = WifiMgr.getInstance(ChooseReceiverActivity.this).getIpAddressFromHotspot();
+            MLog.i(TAG, "receiver serverIp ----->>>" + targetIpAddr);
+            count++;
         }
 
         // 即使获取到连接的热点wifi的IP地址也是无法连接网络 所以采取此策略
         count = 0;
-        while(!NetUtils.pingIpAddress(targetIpAddr) && count < Constant.DEFAULT_TRY_TIME){
+        while (!NetUtils.pingIpAddress(targetIpAddr) && count < Constant.DEFAULT_TRY_TIME) {
             Thread.sleep(500);
-            Log.i(TAG, "try to ping ----->>>" + targetIpAddr + " - " + count );
-            count ++;
+            MLog.i(TAG, "try to ping ----->>>" + targetIpAddr + " - " + count);
+            count++;
         }
 
-        mDatagramSocket = new DatagramSocket(serverPort);
-        byte[] receiveData = new byte[1024];
-        byte[] sendData = null;
+
+        if (Constant.mSendDatagramSocket == null) {
+            Constant.mSendDatagramSocket = new DatagramSocket(serverPort);
+        }
+
         InetAddress ipAddress = InetAddress.getByName(targetIpAddr);
-
-        //0.发送 即将发送的文件列表 到文件接收方
-        sendFileInfoListToFileReceiverWithUdp(serverPort, ipAddress);
-
-        //1.发送 文件接收方 初始化信息
-        sendData = Constant.MSG_FILE_RECEIVER_INIT.getBytes(BaseTransfer.UTF_8);
-        DatagramPacket sendPacket =
-                new DatagramPacket(sendData, sendData.length, ipAddress, serverPort);
-        mDatagramSocket.send(sendPacket);
-        MLog.i(TAG, "Send Msg To FileReceiver######>>>" + Constant.MSG_FILE_RECEIVER_INIT);
-
-//        sendFileInfoListToFileReceiverWithUdp(serverPort, ipAddress);
+        Constant.friendIpPortInfo = new IpPortInfo(ipAddress,Constant.DEFAULT_SERVER_COM_PORT);//保存对方（开热点）的地址
+        MLog.i(TAG, "save friend ipAddress is " + ipAddress);
 
 
-        //2.接收 文件接收方 初始化 反馈
-        while(true) {
-            DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-            mDatagramSocket.receive(receivePacket);
-            String response = new String( receivePacket.getData(), BaseTransfer.UTF_8).trim();
-            MLog.i(TAG, "Get the msg from FileReceiver######>>>" + response);
-            if(response != null && response.equals(Constant.MSG_FILE_RECEIVER_INIT_SUCCESS)){
-                // 进入文件发送列表界面 （并且通知文件接收方进入文件接收列表界面）
-                mHandler.obtainMessage(MSG_TO_FILE_SENDER_UI).sendToTarget();
+        ToastUtils.show(ChooseReceiverActivity.this,"已经连接到热点"+ipAddress);
+
+        //0.打开发送的文件列表的activity
+       // Intent sendMsgIntent = new Intent(ChooseReceiverActivity.this,SendFileMessageActivity.class);
+       // startActivity(sendMsgIntent);
+        finish();
+
+
+
+
+    }
+
+    @OnClick({R.id.tv_back, R.id.radarView})
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.tv_back: {
+                onBackPressed();
+                break;
+            }
+            case R.id.radarView: {
+                MLog.i(TAG, "radarView ------>>> click!");
+                new Thread(Scan).start();
+                break;
             }
         }
     }
 
-    /**
-     * 发送即将发送的文件列表到文件接收方
-     * @param serverPort
-     * @param ipAddress
-     * @throws IOException
-     */
-    private void sendFileInfoListToFileReceiverWithUdp(int serverPort, InetAddress ipAddress) throws IOException {
-        //1.1将发送的List<FileInfo> 发送给 文件接收方
-        //如何将发送的数据列表封装成JSON
-        Map<String, FileInfo> sendFileInfoMap = AppContext.getAppContext().getFileInfoMap();
-        List<Map.Entry<String, FileInfo>> fileInfoMapList = new ArrayList<Map.Entry<String, FileInfo>>(sendFileInfoMap.entrySet());
-        List<FileInfo> fileInfoList = new ArrayList<FileInfo>();
-        //排序
-        Collections.sort(fileInfoMapList, Constant.DEFAULT_COMPARATOR);
-        for(Map.Entry<String, FileInfo> entry : fileInfoMapList){
-            if(entry.getValue() != null ){
-                FileInfo fileInfo = entry.getValue();
-                String fileInfoStr = FileInfo.toJsonStr(fileInfo);
-                DatagramPacket sendFileInfoListPacket =
-                        new DatagramPacket(fileInfoStr.getBytes(), fileInfoStr.getBytes().length, ipAddress, serverPort);
-                try{
-                    mDatagramSocket.send(sendFileInfoListPacket);
-                    MLog.i(TAG, "sendFileInfoListToFileReceiverWithUdp------>>>" + fileInfoStr + "=== Success!");
-                }catch (Exception e){
-                    MLog.i(TAG, "sendFileInfoListToFileReceiverWithUdp------>>>" + fileInfoStr + "=== Failure!");
-                }
 
-            }
-        }
-    }
-
-    /**
-     * 关闭UDP Socket 流
-     */
-    private void closeSocket(){
-        if(mDatagramSocket != null){
-            mDatagramSocket.disconnect();
-            mDatagramSocket.close();
-            mDatagramSocket = null;
-        }
-    }
 
 }

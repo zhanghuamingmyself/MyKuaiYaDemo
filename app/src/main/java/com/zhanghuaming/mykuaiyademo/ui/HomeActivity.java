@@ -27,6 +27,7 @@ import com.zhanghuaming.mykuaiyademo.Constant;
 
 import com.zhanghuaming.mykuaiyademo.R;
 import com.zhanghuaming.mykuaiyademo.common.BaseActivity;
+import com.zhanghuaming.mykuaiyademo.core.utils.ApMgr;
 import com.zhanghuaming.mykuaiyademo.core.utils.FileUtils;
 import com.zhanghuaming.mykuaiyademo.core.utils.MLog;
 import com.zhanghuaming.mykuaiyademo.core.utils.TextUtils;
@@ -77,6 +78,8 @@ public class HomeActivity extends BaseActivity
     Button btn_send_big;
     @Bind(R.id.btn_receive_big)
     Button btn_receive_big;
+    @Bind(R.id.btn_chose_AP)
+    Button btn_chose_AP;
 
     @Bind(R.id.rl_device)
     RelativeLayout rl_device;
@@ -204,6 +207,10 @@ public class HomeActivity extends BaseActivity
             } else {
 //                super.onBackPressed();
                 if(mIsExist){
+                    if(ApMgr.isApOn(this))
+                    {
+                        ApMgr.disableAp(this);//关闭热点
+                    }
                     this.finish();
                 }else{
                     ToastUtils.show(getContext(), getContext().getResources().getString(R.string.tip_call_back_agin_and_exist)
@@ -245,7 +252,7 @@ public class HomeActivity extends BaseActivity
     }
 
     @OnClick({R.id.btn_send_big, R.id.btn_receive_big,
-            R.id.btn_set, R.id.rl_file, R.id.rl_storage,R.id.rl_device ,R.id.btn_http })
+            R.id.btn_set, R.id.rl_file, R.id.rl_storage,R.id.rl_device ,R.id.btn_http,R.id.btn_chose_AP })
     public void onClick(View view){
         switch (view.getId()) {
             case R.id.btn_send:
@@ -276,6 +283,9 @@ public class HomeActivity extends BaseActivity
             case R.id.btn_http:
                 ToastUtils.show(this,"just a test");
                 NavigatorUtils.toHTTPServerUI(getContext());
+                break;
+            case R.id.btn_chose_AP:
+                NavigatorUtils.toChooseReceiverUI(getContext());
                 break;
         }
     }

@@ -13,6 +13,7 @@ import com.zhanghuaming.mykuaiyademo.ui.ChooseReceiverActivity;
 import com.zhanghuaming.mykuaiyademo.ui.FileReceiverActivity;
 import com.zhanghuaming.mykuaiyademo.ui.FileSenderActivity;
 import com.zhanghuaming.mykuaiyademo.ui.ReceiverWaitingActivity;
+import com.zhanghuaming.mykuaiyademo.ui.SendFileMessageActivity;
 import com.zhanghuaming.mykuaiyademo.ui.SettingActivity;
 import com.zhanghuaming.mykuaiyademo.ui.WebTransferActivity;
 
@@ -161,6 +162,15 @@ public class NavigatorUtils {
         }
 
         Intent intent = new Intent(context, SettingActivity.class);
+        context.startActivity(intent);
+    }
+
+    public static void todirectSendFileUI(Context context)
+    {
+        if(context == null) {
+            throw new RuntimeException("Context not be null");
+        }
+        Intent intent = new Intent(context, SendFileMessageActivity.class);
         context.startActivity(intent);
     }
 }

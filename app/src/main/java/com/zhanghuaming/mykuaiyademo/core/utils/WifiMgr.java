@@ -1,7 +1,9 @@
 package com.zhanghuaming.mykuaiyademo.core.utils;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
 import android.net.DhcpInfo;
+import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
@@ -40,6 +42,17 @@ public class WifiMgr {
         this.mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
     }
 
+    public static boolean isConnect(Context context)
+    {
+        ConnectivityManager connectivityManager = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo wifiNetworkInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        if(wifiNetworkInfo.isConnected())
+        {
+            return true ;
+        }
+
+        return false ;
+    }
     public static WifiMgr getInstance(Context context){
         if(mWifiMgr == null){
             synchronized (WifiMgr.class){

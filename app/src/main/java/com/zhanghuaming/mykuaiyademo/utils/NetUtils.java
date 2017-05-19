@@ -1,6 +1,12 @@
 package com.zhanghuaming.mykuaiyademo.utils;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+
 import java.io.IOException;
+
+import static android.content.Context.CONNECTIVITY_SERVICE;
 
 /**
  * Created by zhanghuaming on 2016/12/1.
@@ -26,6 +32,21 @@ public class NetUtils {
             e.printStackTrace();
         } catch (InterruptedException e) {
             e.printStackTrace();
+        }
+        return false;
+    }
+
+    /**
+     *
+     * @param context
+     * @return是否还在连接状态
+     */
+    public static boolean stillConnect(Context context)
+    {
+        ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(CONNECTIVITY_SERVICE);
+        NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        if (mWifi.isConnected()) {
+            return true;
         }
         return false;
     }

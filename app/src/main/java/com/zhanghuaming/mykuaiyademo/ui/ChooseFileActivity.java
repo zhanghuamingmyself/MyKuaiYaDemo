@@ -28,6 +28,7 @@ import com.zhanghuaming.mykuaiyademo.core.utils.ToastUtils;
 import com.zhanghuaming.mykuaiyademo.ui.fragment.FileInfoFragment;
 import com.zhanghuaming.mykuaiyademo.ui.view.ShowSelectedFileInfoDialog;
 import com.zhanghuaming.mykuaiyademo.utils.NavigatorUtils;
+import com.zhanghuaming.mykuaiyademo.utils.NetUtils;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -249,9 +250,6 @@ public class ChooseFileActivity extends BaseActivity {
                 break;
             }
             case R.id.btn_next:{
-//                btn_selected.setEnabled(false);
-//                btn_selected.setBackgroundResource(R.drawable.shape_bottom_text_unenable);
-//                btn_selected.setTextColor(getResources().getColor(R.color.darker_gray));
                 if(!AppContext.getAppContext().isFileInfoMapExist()){//不存在选中的文件
                     ToastUtils.show(getContext(), getContext().getString(R.string.tip_please_select_your_file));
                     return;
@@ -262,6 +260,11 @@ public class ChooseFileActivity extends BaseActivity {
                     return;
                 }
                 //跳转到应用间传输
+                if(NetUtils.stillConnect(ChooseFileActivity.this))
+                {
+                    NavigatorUtils.todirectSendFileUI(getContext());
+                    return;
+                }
                 NavigatorUtils.toChooseReceiverUI(getContext());
                 break;
             }

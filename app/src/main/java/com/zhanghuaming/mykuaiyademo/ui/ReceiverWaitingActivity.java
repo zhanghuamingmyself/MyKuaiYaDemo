@@ -3,14 +3,19 @@ package com.zhanghuaming.mykuaiyademo.ui;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -25,7 +30,10 @@ import com.zhanghuaming.mykuaiyademo.common.BaseActivity;
 import com.zhanghuaming.mykuaiyademo.core.entity.FileInfo;
 import com.zhanghuaming.mykuaiyademo.core.entity.IpPortInfo;
 import com.zhanghuaming.mykuaiyademo.core.receiver.WifiAPBroadcastReceiver;
+import com.zhanghuaming.mykuaiyademo.core.service.ReceiverMsgService;
+import com.zhanghuaming.mykuaiyademo.core.service.SenderMsgService;
 import com.zhanghuaming.mykuaiyademo.core.utils.ApMgr;
+import com.zhanghuaming.mykuaiyademo.core.utils.MLog;
 import com.zhanghuaming.mykuaiyademo.core.utils.TextUtils;
 import com.zhanghuaming.mykuaiyademo.core.utils.ToastUtils;
 import com.zhanghuaming.mykuaiyademo.core.utils.WifiMgr;
@@ -39,6 +47,9 @@ import java.net.InetAddress;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+
+import static com.zhanghuaming.mykuaiyademo.core.service.ReceiverMsgService.MSG_TO_FILE_RECEIVER_UI;
+import static com.zhanghuaming.mykuaiyademo.core.service.ReceiverMsgService.mIsInitialized;
 
 
 /**
@@ -70,14 +81,6 @@ public class ReceiverWaitingActivity extends BaseActivity {
     TextView tv_desc;
 
     WifiAPBroadcastReceiver mWifiAPBroadcastReceiver;
-    boolean mIsInitialized = false;
-
-    /**
-     * 与 文件发送方 通信的 线程
-     */
-    Runnable mUdpServerRuannable;
-
-    public static final int MSG_TO_FILE_RECEIVER_UI = 0X88;
 
     Handler mHandler = new Handler(){
         @Override
@@ -87,7 +90,6 @@ public class ReceiverWaitingActivity extends BaseActivity {
                 Bundle bundle = new Bundle();
                 bundle.putSerializable(Constant.KEY_IP_PORT_INFO, ipPortInfo);
                 NavigatorUtils.toFileReceiverListUI(getContext(), bundle);
-
                 finishNormal();
             }
         }
@@ -100,16 +102,6 @@ public class ReceiverWaitingActivity extends BaseActivity {
         setContentView(R.layout.activity_receiver_waiting);
 
         ButterKnife.bind(this);
-
-        /**
-        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_SETTINGS)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_SETTINGS}, REQUEST_CODE_WRITE_SETTINGS);
-        }else{
-//            initData();//初始化数据
-            init();
-        }
-         */
 
         initWithGetPermission(this);
     }
@@ -144,7 +136,7 @@ public class ReceiverWaitingActivity extends BaseActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_WRITE_SETTINGS && Settings.System.canWrite(this)){
-            Log.d("TAG", "CODE_WRITE_SETTINGS_PERMISSION success");
+            Log.d(TAG, "CODE_WRITE_SETTINGS_PERMISSION success");
             //do your code
             init();
         }
@@ -163,37 +155,6 @@ public class ReceiverWaitingActivity extends BaseActivity {
 
     }
 
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-
-        if(mWifiAPBroadcastReceiver != null){
-            unregisterReceiver(mWifiAPBroadcastReceiver);
-            mWifiAPBroadcastReceiver = null;
-        }
-
-        closeSocket();
-
-        //关闭热点
-        ApMgr.disableAp(getContext());
-
-        this.finish();
-    }
-
-
-    /**
-     * 成功进入 文件接收列表UI 调用的finishNormal()
-     */
-    private void finishNormal(){
-        if(mWifiAPBroadcastReceiver != null){
-            unregisterReceiver(mWifiAPBroadcastReceiver);
-            mWifiAPBroadcastReceiver = null;
-        }
-
-        closeSocket();
-
-        this.finish();
-    }
 
     /**
      * 初始化
@@ -206,18 +167,35 @@ public class ReceiverWaitingActivity extends BaseActivity {
 
         //1.初始化热点
         WifiMgr.getInstance(getContext()).disableWifi();
+
         if(ApMgr.isApOn(getContext())){
             ApMgr.disableAp(getContext());
         }
+
+        Intent ssi = new Intent(ReceiverWaitingActivity.this, ReceiverMsgService.class);
+        bindService(ssi, ssc, BIND_AUTO_CREATE);//绑定接收消息的服务
+        bound = true;
 
         mWifiAPBroadcastReceiver = new WifiAPBroadcastReceiver() {
             @Override
             public void onWifiApEnabled() {
                 Log.i(TAG, "======>>>onWifiApEnabled !!!");
+
                 if(!mIsInitialized){
-                    mUdpServerRuannable = createSendMsgToFileSenderRunnable();
-                    AppContext.MAIN_EXECUTOR.execute(mUdpServerRuannable);
-                    mIsInitialized = true;
+                    if (bound) {
+                        //初始化获取自己的IP
+                        Message message = Message.obtain(null,
+                                ReceiverMsgService.MSG_TO_GET_SELF_IP, 0, 0);
+                        //开始监听端口，等待连接
+                        Message message2 = Message.obtain(null,
+                                ReceiverMsgService.MSG_TO_START_RECEIVER_FILE_MSG, 0, 0);
+                        try {
+                            messenger.send(message);
+                            messenger.send(message2);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
 
                     tv_desc.setText(getResources().getString(R.string.tip_now_init_is_finish));
                     tv_desc.postDelayed(new Runnable() {
@@ -232,19 +210,69 @@ public class ReceiverWaitingActivity extends BaseActivity {
         IntentFilter filter = new IntentFilter(WifiAPBroadcastReceiver.ACTION_WIFI_AP_STATE_CHANGED);
         registerReceiver(mWifiAPBroadcastReceiver, filter);
 
-        ApMgr.isApOn(getContext()); // check Ap state :boolean
+        ApMgr.isApOn(getContext());// check Ap state :boolean
         String ssid;
-        if(Constant.MYName !=null) {
-           ssid = Constant.MYName;
-        }else
-        {
-           Constant.MYName= ssid =  "ZHM"+ (TextUtils.isNullOrBlank(android.os.Build.DEVICE) ? Constant.DEFAULT_SSID : android.os.Build.DEVICE);
-        }
+        ssid = Constant.MYName;
         ApMgr.configApState(getContext(), ssid); // change Ap state :boolean
-
         tv_device_name.setText(ssid);
         tv_desc.setText(getResources().getString(R.string.tip_now_is_initial));
     }
+
+
+
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+        if(mWifiAPBroadcastReceiver != null){
+            unregisterReceiver(mWifiAPBroadcastReceiver);
+            mWifiAPBroadcastReceiver = null;
+        }
+
+        if (bound) {
+            Message message = Message.obtain(null,
+                    ReceiverMsgService.MSG_TO_CLOSE_SOCKET, 0, 0);
+            try {
+                messenger.send(message);
+                //unbindService(ssc);//解绑服务
+                //bound = false;
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+
+        //关闭热点
+        //ApMgr.disableAp(getContext());
+        this.finish();
+    }
+
+
+    /**
+     * 成功进入 文件接收列表UI 调用的finishNormal()
+     */
+    private void finishNormal(){
+        if(mWifiAPBroadcastReceiver != null){
+            unregisterReceiver(mWifiAPBroadcastReceiver);
+            mWifiAPBroadcastReceiver = null;
+        }
+
+        if (bound) {
+            Message message = Message.obtain(null,
+                    ReceiverMsgService.MSG_TO_CLOSE_SOCKET, 0, 0);
+            try {
+                messenger.send(message);
+                unbindService(ssc);//解绑服务
+                bound = false;
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+
+        this.finish();
+    }
+
+
 
     @OnClick({R.id.tv_back})
     public void onClick(View view){
@@ -256,93 +284,37 @@ public class ReceiverWaitingActivity extends BaseActivity {
         }
     }
 
-    /**
-     * 创建发送UDP消息到 文件发送方 的服务线程
-     */
-    private Runnable createSendMsgToFileSenderRunnable(){
-        return new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    startFileReceiverServer(Constant.DEFAULT_SERVER_COM_PORT);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+
+    Messenger messenger;
+    private ReceiverMsgService receiverMsgService;//发送服务
+    private Boolean bound = false;//是否绑定服务
+    private ServiceConnection ssc = new ServiceConnection()
+    {
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            // TODO Auto-generated method stub
+            MLog.e(TAG,"已经绑定接收消息的服务");
+            messenger = new Messenger(service);
+            Message message = Message.obtain(null,
+                    ReceiverMsgService.SET_HANDLER, 0, 0);
+            message.obj = mHandler;
+            try {
+                messenger.send(message);
+            } catch (RemoteException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
             }
-        };
-    }
-    
-
-    /**
-     * 开启 文件接收方 通信服务 (必须在子线程执行)
-     * @param serverPort
-     * @throws Exception
-     */
-    DatagramSocket mDatagramSocket;
-    private void startFileReceiverServer(int serverPort) throws Exception {
-
-        //网络连接上，无法获取IP的问题
-        int count = 0;
-        String localAddress = WifiMgr.getInstance(getContext()).getHotspotLocalIpAddress();
-        while(localAddress.equals(Constant.DEFAULT_UNKOWN_IP) && count <  Constant.DEFAULT_TRY_TIME){
-            Thread.sleep(1000);
-            localAddress = WifiMgr.getInstance(getContext()).getHotspotLocalIpAddress();
-            Log.i(TAG, "receiver get local Ip ----->>>" + localAddress);
-            Constant.localAddress=localAddress;//保存自己的地址
-            count ++;
+            bound = true;
         }
 
-        mDatagramSocket = new DatagramSocket(serverPort);
-        byte[] receiveData = new byte[1024];
-        byte[] sendData = null;
-        while(true) {
-            //1.接收 文件发送方的消息
-            DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-            mDatagramSocket.receive(receivePacket);
-            String msg = new String( receivePacket.getData()).trim();
-            InetAddress inetAddress = receivePacket.getAddress();
-            Constant.friendIpAddress = inetAddress;//保存对方地址
-            int port = receivePacket.getPort();
-//            Log.i(TAG, "Get the msg from FileReceiver######>>>" + Constant.MSG_FILE_RECEIVER_INIT);
-            if(msg != null && msg.startsWith(Constant.MSG_FILE_RECEIVER_INIT)){
-                Log.i(TAG, "Get the msg from FileReceiver######>>>" + Constant.MSG_FILE_RECEIVER_INIT);
-                // 进入文件接收列表界面 (文件接收列表界面需要 通知 文件发送方发送 文件开始传输UDP通知)
-                mHandler.obtainMessage(MSG_TO_FILE_RECEIVER_UI, new IpPortInfo(inetAddress, port)).sendToTarget();
-            }else{ //接收发送方的 文件列表
-                if(msg != null){
-//                    FileInfo fileInfo = FileInfo.toObject(msg);
-                    System.out.println("Get the FileInfo from FileReceiver######>>>" + msg);
-                    parseFileInfo(msg);
-                }
-            }
-
-            //2.反馈 文件发送方的消息
-//            sendData = Constant.MSG_FILE_RECEIVER_INIT_SUCCESS.getBytes(BaseTransfer.UTF_8);
-//            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, inetAddress, port);
-//            serverSocket.send(sendPacket);
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            // TODO Auto-generated method stub
+            messenger = null;
+            bound =false;
         }
-    }
 
-    /**
-     * 解析FileInfo
-     * @param msg
-     */
-    private void parseFileInfo(String msg) {
-        FileInfo fileInfo = FileInfo.toObject(msg);
-        if(fileInfo != null && fileInfo.getFilePath() != null){
-            AppContext.getAppContext().addReceiverFileInfo(fileInfo);
-        }
-    }
-
-    /**
-     * 关闭UDP Socket 流
-     */
-    private void closeSocket(){
-        if(mDatagramSocket != null){
-            mDatagramSocket.disconnect();
-            mDatagramSocket.close();
-            mDatagramSocket = null;
-        }
-    }
+    };
 
 }

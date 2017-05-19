@@ -88,8 +88,21 @@
             android:launchMode="singleTop"
             android:theme="@style/AppTheme.NoActionBar"></activity>
 
+        <!--发送文件信息的界面（已经连接）-->
+        <activity android:name=".ui.SendFileMessageActivity"
+            android:launchMode="singleTop"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
 
+        <!--准备好接收文件信息的界面（已经连接）-->
+        <activity android:name=".ui.BaseWaitForReceiverActivity"
+            android:launchMode="singleTop"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
 
+        <!--发送文件的服务-->
+        <service android:name=".core.service.SenderMsgService"></service>
+
+        <!--接收文件的服务-->
+        <service android:name=".core.service.ReceiverMsgService"></service>
 
         <provider
             android:name="android.support.v4.content.FileProvider"

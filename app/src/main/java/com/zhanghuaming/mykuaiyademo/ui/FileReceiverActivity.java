@@ -152,7 +152,7 @@ public class FileReceiverActivity extends BaseActivity {
 
         AppContext.getAppContext().getReceiverFileInfoMap().clear();
 
-        ApMgr.disableAp(getContext());
+       // ApMgr.disableAp(getContext());先不关热点
         this.finish();
     }
 
@@ -167,6 +167,7 @@ public class FileReceiverActivity extends BaseActivity {
         mFileReceiverAdapter = new FileReceiverAdapter(getContext());
         lv_result.setAdapter(mFileReceiverAdapter);
 
+        //获取发送方的ip和端口,我拷贝一份到Constant.friendIpInfo里
         mIpPortInfo = (IpPortInfo) getIntent().getSerializableExtra(Constant.KEY_IP_PORT_INFO);
 
 
@@ -317,7 +318,6 @@ public class FileReceiverActivity extends BaseActivity {
                 mHandler.obtainMessage(MSG_FILE_RECEIVER_INIT_SUCCESS).sendToTarget();
                 while (!Thread.currentThread().isInterrupted()){
                     Socket socket = serverSocket.accept();
-
                     //生成缩略图
                     FileReceiver fileReceiver = new FileReceiver(socket);
                     fileReceiver.setOnReceiveListener(new FileReceiver.OnReceiveListener() {

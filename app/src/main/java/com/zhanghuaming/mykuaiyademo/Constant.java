@@ -1,7 +1,10 @@
 package com.zhanghuaming.mykuaiyademo;
 
 import com.zhanghuaming.mykuaiyademo.core.entity.FileInfo;
+import com.zhanghuaming.mykuaiyademo.core.entity.IpPortInfo;
+import com.zhanghuaming.mykuaiyademo.core.utils.TextUtils;
 
+import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.Comparator;
 import java.util.Map;
@@ -47,7 +50,7 @@ public class Constant {
     /**
     * 我的SSID名字
      */
-    public static String MYName;
+    public static String MYName="ZHM"+ (TextUtils.isNullOrBlank(android.os.Build.DEVICE) ? Constant.DEFAULT_SSID : android.os.Build.DEVICE);;
 
     /**
      * Android微型服务器 默认端口
@@ -116,9 +119,10 @@ public class Constant {
     /**
      * 连接建立后保留的信息
      */
+    public static boolean meIsAP = false;
     public static String localAddress;
     public static String friendName;
-    public static int serverPort;
-    public static InetAddress friendIpAddress;
+    public static DatagramSocket mSendDatagramSocket;//发送uDP的socket
+    public static IpPortInfo friendIpPortInfo;
 }
 

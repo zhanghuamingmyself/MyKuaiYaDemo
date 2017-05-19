@@ -40,6 +40,12 @@
             style="@style/style_home_big_text_view"
             android:layout_marginTop="@dimen/dp_32"
             android:text="@string/http" />
+
+        <Button
+            android:id="@+id/btn_chose_AP"
+            style="@style/style_home_big_text_view"
+            android:layout_marginTop="@dimen/dp_32"
+            android:text="@string/searchAP" />
     </LinearLayout>
 
     <LinearLayout

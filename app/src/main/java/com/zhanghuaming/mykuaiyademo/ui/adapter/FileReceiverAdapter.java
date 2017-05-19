@@ -162,6 +162,15 @@ public class FileReceiverAdapter extends BaseAdapter {
                             FileUtils.openFile(mContext, FileUtils.getLocalFilePath(fileInfo.getFilePath()));
                         }
                     });
+                }else
+                {
+                    viewHolder.btn_operation.setText(mContext.getResources().getString(R.string.str_open));
+                    viewHolder.btn_operation.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            FileUtils.openFile(mContext, FileUtils.getLocalFilePath(fileInfo.getFilePath()));
+                        }
+                    });
                 }
 
             }else if(fileInfo.getResult() == FileInfo.FLAG_FAILURE) { //文件传输失败
