@@ -904,9 +904,66 @@ public class FileUtils {
             intent.setDataAndType(uri, "video/*");
         }else
         {
-            ToastUtils.show(context,"暂时无法打开此文件，请用文件浏览器打开");
-            return;
+            if (filePath.lastIndexOf(".3gp") > 0)
+            {
+                intent.setDataAndType(uri, "video/*");
+            }else if(filePath.lastIndexOf(".avi") > 0){
+                intent.setDataAndType(uri, "video/*");
+            }else if(filePath.lastIndexOf(".bmp") > 0){
+                intent.setDataAndType(uri, "image/bmp");
+            } else if(filePath.lastIndexOf(".png") > 0){
+                intent.setDataAndType(uri, "image/png");
+            }else if(filePath.lastIndexOf(".c") > 0){
+                intent.setDataAndType(uri, "text/plain");
+            }else if(filePath.lastIndexOf(".cpp") > 0){
+                intent.setDataAndType(uri, "text/plain");
+            }else if(filePath.lastIndexOf(".doc") > 0){
+                intent.setDataAndType(uri, "application/msword");
+            }else if(filePath.lastIndexOf(".docx") > 0){
+                intent.setDataAndType(uri, "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+            }else if(filePath.lastIndexOf(".gif") > 0){
+                intent.setDataAndType(uri, "image/gif");
+            }else if(filePath.lastIndexOf(".gtar") > 0){
+                intent.setDataAndType(uri, "application/x-gtar");
+            }else if(filePath.lastIndexOf(".gz") > 0){
+                intent.setDataAndType(uri, "application/x-gzip");
+            }else if(filePath.lastIndexOf(".h") > 0){
+                intent.setDataAndType(uri, "text/plain");
+            }else if(filePath.lastIndexOf(".htm") > 0){
+                intent.setDataAndType(uri, "text/html");
+            }else if(filePath.lastIndexOf(".html") > 0){
+                intent.setDataAndType(uri, "text/html");
+            }else if(filePath.lastIndexOf(".java") > 0){
+                intent.setDataAndType(uri, "text/plain");
+            }else if(filePath.lastIndexOf("jpeg") > 0){
+                intent.setDataAndType(uri, "image/jpeg");
+            }else if(filePath.lastIndexOf(".js") > 0){
+                intent.setDataAndType(uri, "application/x-JavaScript");
+            }else if(filePath.lastIndexOf(".mov") > 0){
+                intent.setDataAndType(uri, "video/quicktime");
+            }else if(filePath.lastIndexOf(".ppt") > 0){
+                intent.setDataAndType(uri, "application/vnd.ms-powerpoint");
+            }else if(filePath.lastIndexOf(".pptx") > 0){
+                intent.setDataAndType(uri, "application/vnd.openxmlformats-officedocument.presentationml.presentation");
+            }else if(filePath.lastIndexOf(".rmvb") > 0){
+                intent.setDataAndType(uri, "audio/x-pn-realaudio");
+            }else if(filePath.lastIndexOf(".tar") > 0){
+                intent.setDataAndType(uri, "application/x-tar");
+            }else if(filePath.lastIndexOf(".txt") > 0){
+                intent.setDataAndType(uri, "text/plain");
+            }else if(filePath.lastIndexOf(".wav") > 0){
+                intent.setDataAndType(uri, "audio/x-wav");
+            }else if(filePath.lastIndexOf(".wps") > 0){
+                intent.setDataAndType(uri, "application/vnd.ms-works");
+            }else if(filePath.lastIndexOf(".xml") > 0){
+                intent.setDataAndType(uri, "atext/plain");
+            }else if(filePath.lastIndexOf(".zip") > 0){
+                intent.setDataAndType(uri, "application/x-zip-compressed");
+            } else {
+                intent.setDataAndType(uri, "*/*");
+            }
         }
+
         context.startActivity(intent);
     }
 

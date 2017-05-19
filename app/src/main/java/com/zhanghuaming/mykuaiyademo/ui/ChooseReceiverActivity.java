@@ -191,7 +191,7 @@ public class ChooseReceiverActivity extends BaseActivity {
     private void getOrUpdateWifiScanResult(){
         WifiMgr.getInstance(getContext()).startScan();
         mScanResultList = WifiMgr.getInstance(getContext()).getScanResultList();
-        mScanResultList = ListUtils.filterWithNoPassword(mScanResultList);
+        mScanResultList = ListUtils.filterWithNoPassword(mScanResultList);//过滤没用的网络
 
         if(mScanResultList != null){
             mWifiScanResultAdapter = new WifiScanResultAdapter(getContext(),mScanResultList);

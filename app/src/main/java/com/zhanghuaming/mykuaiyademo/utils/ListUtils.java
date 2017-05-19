@@ -32,7 +32,7 @@ public class ListUtils {
         for(ScanResult scanResult : scanResultList){
             if(scanResult.capabilities != null && scanResult.capabilities.equals(NO_PASSWORD) || scanResult.capabilities != null && scanResult.capabilities.equals(NO_PASSWORD_WPS)){
                 MLog.e(TAG,"scan Wifi SSID id -----"+scanResult.SSID);
-                if(scanResult.SSID.startsWith(Constant.MYName)) {
+                if(scanResult.SSID.startsWith("ZHM")) {
 
                     resultList.add(scanResult);
                 }
